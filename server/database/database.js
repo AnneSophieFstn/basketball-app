@@ -12,11 +12,4 @@ const sequelize = new Sequelize(
   }
 );
 
-export default async function connectDB() {
-  try {
-    await sequelize.authenticate();
-    console.log("Connexion à la base de données établie avec succès !");
-  } catch (error) {
-    console.error("Erreur lors de la connexion à la base de données :", error);
-  }
-}
+export default sequelize;
