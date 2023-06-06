@@ -30,6 +30,4 @@ const User = sequelize.define("User", {
   },
 });
 
-console.log("TEST USER MODEL: ", User === sequelize.models.User); // true
-
 export default User;
