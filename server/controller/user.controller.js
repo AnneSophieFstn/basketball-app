@@ -15,7 +15,7 @@ async function getAllUser(req, res) {
 
 async function getOneUser(req, res) {
   try {
-    const user = await UserModel.findById(req.params.userId);
+    const user = await UserModel.findByPk(req.params.id);
 
     if (!user) {
       return res.status(404).json({ message: "Cet utilisateur n'existe pas" });
@@ -74,13 +74,16 @@ async function updateUser(req, res) {
         .json({ message: "Merci de renseigner l'ensemble des informations" });
     }
 
-    const createUser = UserModel.create({
-      name: req.query.name,
-      username: req.query.username,
-      email: req.query.email,
-      password: bcrypt.hashSync(req.query.password, saltRounds),
-    });
-    if (!editUser) {
+    const updateUser = UserModel.update(
+      {
+        name: req.query.name,
+        username: req.query.username,
+        email: req.query.email,
+        password: bcrypt.hashSync(req.query.password, saltRounds),
+      },
+      { where: { id: req.params.id } }
+    );
+    if (!updateUser) {
       res.status(400).json({ message: "Cet utilisateur n'existe pas" });
     }
 
@@ -97,7 +100,9 @@ async function updateUser(req, res) {
 
 async function deleteUser(req, res) {
   try {
-    const deleteUser = await UserModel.findByIdAndDelete(req.params.userId);
+    const deleteUser = await UserModel.destroy({
+      where: { id: req.params.id },
+    });
 
     if (!deleteUser) {
       res.status(400).json({ message: "Cet utilisateur n'existe pas" });
@@ -115,4 +120,4 @@ async function deleteUser(req, res) {
   }
 }
 
-export default getAllUser;
+export { getAllUser, getOneUser, createUser, updateUser, deleteUser };
