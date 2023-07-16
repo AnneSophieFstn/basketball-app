@@ -1,6 +1,7 @@
-import MapView from "react-native-maps";
-import { StyleSheet, Text, View } from "react-native";
-import { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { StyleSheet, Text, View, Image } from "react-native";
+import { useEffect, useState } from "react";
+import configDB from "../../database/database.js";
 
 export default function Maps() {
   let initialState = {
@@ -10,6 +11,14 @@ export default function Maps() {
     longitudeDelta: 0.7,
   };
 
+  const [terrains, setTerrains] = useState([]);
+
+  useEffect(() => {
+    configDB.get("/terrains").then((response) => {
+      setTerrains(response.data);
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
       <MapView
@@ -17,7 +26,25 @@ export default function Maps() {
         provider={PROVIDER_GOOGLE}
         region={initialState}
         showsUserLocation={true}
-      />
+      >
+        {terrains.map((marker) => {
+          return (
+            <Marker
+              key={marker.id}
+              coordinate={{
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+              }}
+              title={marker.name}
+            >
+              <Image
+                source={require("../../../assets/pin-basketball.png")}
+                style={{ width: 30, height: 30, resizeMode: "contain" }}
+              />
+            </Marker>
+          );
+        })}
+      </MapView>
     </View>
   );
 }
