@@ -33,8 +33,7 @@ function HomeTabNavigation() {
         name="Carte"
         component={Maps}
         options={{
-          headerTitleAlign: "center",
-          tabBarLabel: "Carte",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="google-maps"
