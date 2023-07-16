@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import HomeTabNavigation from "./HomeTabNavigation.js";
+import OneMatch from "../screens/matchs/OneMatch.js";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,11 @@ function Router() {
         <Stack.Screen
           name="Accueil"
           component={HomeTabNavigation}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Match"
+          component={OneMatch}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
