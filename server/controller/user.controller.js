@@ -1,5 +1,6 @@
 import UserModel from "../model/user.model.js";
 import bcrypt from "bcrypt";
+import Sequelize from "sequelize";
 
 async function getAllUser(req, res) {
   try {
@@ -33,18 +34,8 @@ async function getOneUser(req, res) {
 async function createUser(req, res) {
   try {
     const saltRounds = 10;
-    if (
-      !req.query.name ||
-      !req.query.username ||
-      !req.query.email ||
-      !req.query.password
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Merci de renseigner l'ensemble des informations" });
-    }
 
-    const createUser = UserModel.create({
+    const createUser = await UserModel.create({
       name: req.query.name,
       username: req.query.username,
       email: req.query.email,
@@ -53,10 +44,29 @@ async function createUser(req, res) {
 
     return res.status(200).json({ message: "Utilisateur ajouté avec succès" });
   } catch (error) {
-    return res.status(500).json({
-      message:
-        "Une erreur est survenue lors de la récupération de l'utilisateur",
-    });
+    if (error instanceof Sequelize.ValidationError) {
+      console.log(error);
+      const errors = error.errors.map((err) => err.message);
+
+      errors.forEach((err) => {
+        if (err.path === "name") {
+          createUser.nameError = err.message;
+        } else if (err.path === "username") {
+          createUser.usernameError = err.message;
+        } else if (err.path === "email") {
+          createUser.emailError = err.message;
+        } else if (err.path === "password") {
+          createUser.passwordError = err.message;
+        }
+      });
+
+      return res.status(422).json({ message: errors });
+    } else {
+      return res.status(500).json({
+        message:
+          "Une erreur est survenue lors de la récupération de l'utilisateur",
+      });
+    }
   }
 }
 

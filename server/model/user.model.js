@@ -15,18 +15,48 @@ const User = sequelize.define("User", {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: {
+        args: true,
+        msg: "Le nom ne peut pas être vide.",
+      },
+    },
   },
   username: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
+    validate: {
+      notEmpty: {
+        args: true,
+        msg: "Le pseudo ne peut pas être vide.",
+      },
+    },
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
+    validate: {
+      notEmpty: {
+        args: true,
+        msg: "L'adresse email ne peut pas être vide.",
+      },
+      isEmail: {
+        args: true,
+        msg: "Veuillez entrer une adresse email valide.",
+      },
+    },
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: {
+        args: true,
+        msg: "Le mot de passe ne peut pas être vide.",
+      },
+    },
   },
 });
 
