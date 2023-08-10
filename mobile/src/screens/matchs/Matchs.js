@@ -1,10 +1,11 @@
-import React, { Component, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
-import Match from "../../components/match/Match";
+import React, { useEffect, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { Button } from "@rneui/themed";
 import configDB from "../../database/database";
+import CardComponent from "../../components/card/CardComponent";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Matchs() {
+export default function Matchs({ navigation }) {
   const [matchs, setMatchs] = useState([]);
 
   useEffect(() => {
@@ -14,32 +15,45 @@ export default function Matchs() {
   }, []);
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Button
-          icon="home-group"
-          color="orange"
-          onPress={() => navigation.navigate("Ajouter un match")}
-        >
-          Ajouter un match
-        </Button>
-
-        {matchs.length > 0 ? (
-          <Match matchs={matchs} />
-        ) : (
-          <Text>Pas de matchs</Text>
-        )}
-      </View>
-    </ScrollView>
+    <View>
+      <Button
+        titleStyle={{ color: "white" }}
+        buttonStyle={{
+          backgroundColor: "red",
+        }}
+        onPress={() => navigation.navigate("Ajouter un match")}
+      >
+        <Ionicons
+          name="basketball"
+          size={15}
+          color="#FF9A62"
+          style={{ marginRight: 5 }}
+        />
+        Ajouter un match
+      </Button>
+      <ScrollView>
+        <View>
+          {matchs.map((match) => (
+            <CardComponent
+              navigation={navigation}
+              key={match.id}
+              id={match.id}
+              name={match.name}
+              type={match.type}
+              date={match.date}
+              heure={match.heure}
+              description={match.description}
+              nbrParticipants={match.nbrParticipants}
+              terrain_id={match.terrain_id}
+              user_id={match.user_id}
+              routeApi="matchs"
+              routeName="VueCard"
+              title="Match"
+              titleBtn="PARTICIPER AU MATCH"
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-});
