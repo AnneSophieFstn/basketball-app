@@ -30,14 +30,14 @@ async function getOneMatch(req, res) {
 async function createMatch(req, res) {
   try {
     if (
-      !req.query.name ||
-      !req.query.date ||
-      !req.query.heure ||
-      !req.query.nbrParticipants ||
-      !req.query.typeMatch ||
-      !req.query.description ||
-      !req.query.terrain_id ||
-      !req.query.user_id
+      !req.body.name ||
+      !req.body.date ||
+      !req.body.heure ||
+      !req.body.nbrParticipants ||
+      !req.body.type ||
+      !req.body.description ||
+      !req.body.terrain_id ||
+      !req.body.user_id
     ) {
       return res
         .status(400)
@@ -45,23 +45,26 @@ async function createMatch(req, res) {
     }
 
     const createMatch = Match.create({
-      name: req.query.name,
-      date: req.query.date,
-      heure: req.query.heure,
-      nbrParticipants: req.query.nbrParticipants,
-      typeMatch: req.query.typeMatch,
-      description: req.query.description,
-      terrain_id: req.query.terrain_id,
-      user_id: req.query.user_id,
+      name: req.body.name,
+      date: req.body.date,
+      heure: req.body.heure,
+      nbrParticipants: req.body.nbrParticipants,
+      type: req.body.type,
+      description: req.body.description,
+      terrain_id: req.body.terrain_id,
+      user_id: 1,
     });
 
     return res.status(200).json({
       message: "Match ajouté avec succès",
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Une erreur est survenue lors de la récupération du match",
-    });
+    return res.status(500).json(
+      {
+        message: "Une erreur est survenue lors de la récupération du match",
+      },
+      console.log(error.response)
+    );
   }
 }
 async function updateMatch(req, res) {
@@ -71,7 +74,7 @@ async function updateMatch(req, res) {
       !req.query.date ||
       !req.query.heure ||
       !req.query.nbrParticipants ||
-      !req.query.typeMatch ||
+      !req.query.type ||
       !req.query.description ||
       !req.query.terrain_id ||
       !req.query.user_id
@@ -87,7 +90,7 @@ async function updateMatch(req, res) {
         date: req.query.date,
         heure: req.query.heure,
         nbrParticipants: req.query.nbrParticipants,
-        typeMatch: req.query.typeMatch,
+        type: req.query.type,
         description: req.query.description,
         terrain_id: req.query.terrain_id,
         user_id: req.query.user_id,

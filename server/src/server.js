@@ -6,6 +6,7 @@ import EvenementRoutes from "../routes/evenement.routes.js";
 import TerrainRoutes from "../routes/terrain.routes.js";
 
 const app = express();
+app.use(express.json());
 
 const port = process.env.PORT || 8000;
 
