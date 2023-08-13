@@ -64,15 +64,15 @@ async function createEvenement(req, res) {
 async function updateEvenement(req, res) {
   try {
     if (
-      !req.query.name ||
-      !req.query.date ||
-      !req.query.heure ||
-      !req.query.nbrPlaces ||
-      !req.query.payant ||
-      !req.query.type ||
-      !req.query.description ||
-      !req.query.terrain_id ||
-      !req.query.user_id
+      !req.body.name ||
+      !req.body.date ||
+      !req.body.heure ||
+      !req.body.nbrPlaces ||
+      !req.body.payant ||
+      !req.body.type ||
+      !req.body.description ||
+      !req.body.terrain_id ||
+      !req.body.user_id
     ) {
       return res
         .status(400)
@@ -81,15 +81,15 @@ async function updateEvenement(req, res) {
 
     const updateEvenement = await Evenement.update(
       {
-        name: req.query.name,
-        date: req.query.date,
-        heure: req.query.heure,
-        nbrPlaces: req.query.nbrPlaces,
-        payant: req.query.payant,
-        type: req.query.type,
-        description: req.query.description,
-        terrain_id: req.query.terrain_id,
-        user_id: req.query.user_id,
+        name: req.body.name,
+        date: req.body.date,
+        heure: req.body.heure,
+        nbrPlaces: req.body.nbrPlaces,
+        payant: req.body.payant,
+        type: req.body.type,
+        description: req.body.description,
+        terrain_id: req.body.terrain_id,
+        user_id: req.body.user_id,
       },
       { where: { id: req.params.id } }
     );

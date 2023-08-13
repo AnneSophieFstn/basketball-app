@@ -36,10 +36,10 @@ async function createUser(req, res) {
     const saltRounds = 10;
 
     const createUser = await UserModel.create({
-      name: req.query.name,
-      username: req.query.username,
-      email: req.query.email,
-      password: bcrypt.hashSync(req.query.password, saltRounds),
+      name: req.body.name,
+      username: req.body.username,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, saltRounds),
     });
 
     return res.status(200).json({ message: "Utilisateur ajouté avec succès" });
@@ -74,10 +74,10 @@ async function updateUser(req, res) {
   try {
     const saltRounds = 10;
     if (
-      !req.query.name ||
-      !req.query.username ||
-      !req.query.email ||
-      !req.query.password
+      !req.body.name ||
+      !req.body.username ||
+      !req.body.email ||
+      !req.body.password
     ) {
       return res
         .status(400)
@@ -86,10 +86,10 @@ async function updateUser(req, res) {
 
     const updateUser = UserModel.update(
       {
-        name: req.query.name,
-        username: req.query.username,
-        email: req.query.email,
-        password: bcrypt.hashSync(req.query.password, saltRounds),
+        name: req.body.name,
+        username: req.body.username,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, saltRounds),
       },
       { where: { id: req.params.id } }
     );

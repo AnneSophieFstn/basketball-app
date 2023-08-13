@@ -27,13 +27,13 @@ async function getOneTerrain(req, res) {
 async function createTerrain(req, res) {
   try {
     if (
-      !req.query.name ||
-      !req.query.adresse ||
-      !req.query.nbrTerrains ||
-      !req.query.nbrPaniers ||
-      !req.query.longitude ||
-      !req.query.latitude ||
-      !req.query.user_id
+      !req.body.name ||
+      !req.body.adresse ||
+      !req.body.nbrTerrains ||
+      !req.body.nbrPaniers ||
+      !req.body.longitude ||
+      !req.body.latitude ||
+      !req.body.user_id
     ) {
       return res
         .status(400)
@@ -41,13 +41,13 @@ async function createTerrain(req, res) {
     }
 
     const createTerrain = await Terrain.create({
-      name: req.query.name,
-      adresse: req.query.adresse,
-      nbrTerrains: req.query.nbrTerrains,
-      nbrPaniers: req.query.nbrPaniers,
-      longitude: req.query.longitude,
-      latitude: req.query.latitude,
-      user_id: req.query.user_id,
+      name: req.body.name,
+      adresse: req.body.adresse,
+      nbrTerrains: req.body.nbrTerrains,
+      nbrPaniers: req.body.nbrPaniers,
+      longitude: req.body.longitude,
+      latitude: req.body.latitude,
+      user_id: req.body.user_id,
     });
 
     return res.status(200).json({
@@ -62,13 +62,13 @@ async function createTerrain(req, res) {
 async function updateTerrain(req, res) {
   try {
     if (
-      !req.query.name ||
-      !req.query.adresse ||
-      !req.query.nbrTerrains ||
-      !req.query.nbrPaniers ||
-      !req.query.longitude ||
-      !req.query.latitude ||
-      !req.query.user_id
+      !req.body.name ||
+      !req.body.adresse ||
+      !req.body.nbrTerrains ||
+      !req.body.nbrPaniers ||
+      !req.body.longitude ||
+      !req.body.latitude ||
+      !req.body.user_id
     ) {
       return res
         .status(400)
@@ -77,13 +77,13 @@ async function updateTerrain(req, res) {
 
     const updateTerrain = await Terrain.update(
       {
-        name: req.query.name,
-        adresse: req.query.adresse,
-        nbrTerrains: req.query.nbrTerrains,
-        nbrPaniers: req.query.nbrPaniers,
-        longitude: req.query.longitude,
-        latitude: req.query.latitude,
-        user_id: req.query.user_id,
+        name: req.body.name,
+        adresse: req.body.adresse,
+        nbrTerrains: req.body.nbrTerrains,
+        nbrPaniers: req.body.nbrPaniers,
+        longitude: req.body.longitude,
+        latitude: req.body.latitude,
+        user_id: req.body.user_id,
       },
       { where: { id: req.params.id } }
     );
