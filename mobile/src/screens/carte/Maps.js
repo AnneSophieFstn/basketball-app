@@ -2,6 +2,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { useEffect, useState } from "react";
 import configDB from "../../database/database.js";
+import SearchTerrains from "../../components/search/searchTerrains.js";
 
 export default function Maps() {
   let initialState = {
@@ -12,6 +13,7 @@ export default function Maps() {
   };
 
   const [terrains, setTerrains] = useState([]);
+  const [isInit, setIsInit] = useState(true);
 
   useEffect(() => {
     configDB.get("/terrains").then((response) => {
@@ -45,6 +47,14 @@ export default function Maps() {
           );
         })}
       </MapView>
+
+      <View
+        style={{
+          bottom: "90%",
+        }}
+      >
+        {/* <SearchTerrains /> */}
+      </View>
     </View>
   );
 }

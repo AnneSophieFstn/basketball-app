@@ -10,7 +10,9 @@ import configDB from "../../database/database";
 export default function VueCard({ navigation, route }) {
   const { data } = route.params;
   const [visible, setVisible] = React.useState(false);
-  const [adresse, setAdresse] = React.useState(data.terrain_id);
+  const [adresseT, setAdresseT] = React.useState(data.terrain_id);
+
+  console.log("TERRAIN DATA: ", data);
 
   const toggleOverlay = () => {
     setVisible(!visible);
@@ -20,7 +22,7 @@ export default function VueCard({ navigation, route }) {
     navigation.setOptions({ title: data.title });
 
     configDB.get(`/terrains/${data.terrain_id}`).then((response) => {
-      setAdresse(response.data.adresse);
+      setAdresseT(response.data.adresse);
     });
   }, []);
 
@@ -51,14 +53,47 @@ export default function VueCard({ navigation, route }) {
             width: "100%",
           }}
         >
-          <Button
-            buttonStyle={{
-              borderRadius: 50,
-            }}
-            color="#F24E1E"
-          >
-            <Ionicons name="pencil" size={15} color="white" />
-          </Button>
+          {data.title == "Evenement" ? (
+            <Button
+              buttonStyle={{
+                borderRadius: 50,
+              }}
+              color="#F24E1E"
+              onPress={() =>
+                navigation.navigate("Modifier un evenement", { data: data })
+              }
+            >
+              <Ionicons name="pencil" size={15} color="white" />
+            </Button>
+          ) : null}
+
+          {data.title == "Match" ? (
+            <Button
+              buttonStyle={{
+                borderRadius: 50,
+              }}
+              color="#F24E1E"
+              onPress={() =>
+                navigation.navigate("Modifier un match", { data: data })
+              }
+            >
+              <Ionicons name="pencil" size={15} color="white" />
+            </Button>
+          ) : null}
+
+          {data.title == "Terrain" ? (
+            <Button
+              buttonStyle={{
+                borderRadius: 50,
+              }}
+              color="#F24E1E"
+              onPress={() =>
+                navigation.navigate("Modifier un terrain", { data: data })
+              }
+            >
+              <Ionicons name="pencil" size={15} color="white" />
+            </Button>
+          ) : null}
           <Text>{data.name}</Text>
           <Button
             onPress={() => {
@@ -79,7 +114,9 @@ export default function VueCard({ navigation, route }) {
           />
         </View>
         <View style={{ alignItems: "center", padding: 5 }}>
-          <Text style={{ color: "#595959" }}>{adresse}</Text>
+          <Text style={{ color: "#595959" }}>
+            {adresseT} {data.adresse}
+          </Text>
         </View>
 
         <View
@@ -121,16 +158,6 @@ export default function VueCard({ navigation, route }) {
             >
               <Text style={{ color: "#595959" }}>Nombre de terrain(s)</Text>
               <Text style={{ color: "#EF6C32" }}>{data.nbrTerrains}</Text>
-            </View>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "#595959" }}>Type de terrain</Text>
-              <Text style={{ color: "#EF6C32" }}>Goudron</Text>
             </View>
           </View>
         )}
