@@ -11,6 +11,8 @@ import EditMatch from "../components/form/matchs/EditMatch.js";
 import AddEvenement from "../components/form/evenements/AddEvenement.js";
 import EditEvenement from "../components/form/evenements/EditEvenement.js";
 import DeleteComponent from "../components/card/DeleteComponent.js";
+import AddTerrain from "../components/form/terrains/AddTerrain.js";
+import EditTerrain from "../components/form/terrains/EditTerrain.js";
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +57,18 @@ function Router() {
           name="Supprimer"
           component={DeleteComponent}
           options={{ headerShown: false }}
+        />
+
+        {/* TERRAINS */}
+        <Stack.Screen
+          name="Ajouter un terrain"
+          component={AddTerrain}
+          options={{ headerShown: true, headerTitleAlign: "center" }}
+        />
+        <Stack.Screen
+          name="Modifier un terrain"
+          component={EditTerrain}
+          options={{ headerShown: true, headerTitleAlign: "center" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
