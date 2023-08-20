@@ -22,6 +22,29 @@ async function getOneEvenement(req, res) {
     });
   }
 }
+
+async function getEvenementByTerrain(req, res) {
+  try {
+    const evenementByTerrain = await Evenement.findAll({
+      where: {
+        terrain_id: req.params.terrain_id,
+      },
+    });
+
+    if (!evenementByTerrain.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Aucun evenement trouver pour ce terrain." });
+    }
+
+    return res.status(200).json(evenementByTerrain);
+  } catch (error) {
+    return res.status(500).json({
+      message: error,
+    });
+  }
+}
+
 async function createEvenement(req, res) {
   try {
     if (
@@ -129,6 +152,7 @@ async function deleteEvenement(req, res) {
 export {
   getAllEvenement,
   getOneEvenement,
+  getEvenementByTerrain,
   createEvenement,
   updateEvenement,
   deleteEvenement,
