@@ -27,6 +27,29 @@ async function getOneMatch(req, res) {
     });
   }
 }
+
+async function getMatchByTerrain(req, res) {
+  try {
+    const matchByTerrain = await Match.findAll({
+      where: {
+        terrain_id: req.params.terrain_id,
+      },
+    });
+
+    if (!matchByTerrain.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Aucun match trouver pour ce terrain." });
+    }
+
+    return res.status(200).json(matchByTerrain);
+  } catch (error) {
+    return res.status(500).json({
+      message: error,
+    });
+  }
+}
+
 async function createMatch(req, res) {
   try {
     if (
@@ -128,4 +151,11 @@ async function deleteMatch(req, res) {
   }
 }
 
-export { getAllMatch, getOneMatch, createMatch, updateMatch, deleteMatch };
+export {
+  getAllMatch,
+  getOneMatch,
+  getMatchByTerrain,
+  createMatch,
+  updateMatch,
+  deleteMatch,
+};
