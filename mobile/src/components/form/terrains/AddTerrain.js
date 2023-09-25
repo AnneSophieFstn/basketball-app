@@ -1,11 +1,19 @@
 import React, { useState } from "react";
-import { Dimensions, ScrollView, Text, View } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  View,
+  Image,
+  Button,
+} from "react-native";
 import configDB from "../../../database/database";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Input } from "@rneui/base";
 import ButtonComponent from "../../button/ButtonComponent";
+import * as ImagePicker from "expo-image-picker";
 
 function AddTerrain() {
   const [region, setRegion] = useState({
@@ -15,6 +23,7 @@ function AddTerrain() {
     longitudeDelta: 0.0521,
   });
 
+  const [image, setImage] = React.useState(null);
   const [name, setName] = useState("");
   const [adresse, setAdresse] = useState("");
   const [nbrTerrains, setNbrTerrains] = useState("");
@@ -22,6 +31,28 @@ function AddTerrain() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [user_id, setUser_id] = useState("");
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert(
+        "Désolé, nous avons besoin d'acceder à votre galerie pour que cela fonctionne !"
+      );
+    }
+
+    if (status === "granted") {
+      const response = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+      });
+
+      console.log(response.assets[0].uri);
+
+      if (!response.cancelled) {
+        setImage(response.assets[0].uri);
+      }
+    }
+  };
 
   const AddTerrain = async () => {
     console.log("name", name);
@@ -32,7 +63,15 @@ function AddTerrain() {
     console.log("longitude", longitude.longitude);
     console.log("user_id", user_id);
 
+    const formData = new FormData();
+    formData.append("playground", {
+      name: new Date() + "_playground",
+      uri: image,
+      type: "image/jpg",
+    });
+
     const data = {
+      image: formData,
       name: name,
       adresse: adresse.adresse,
       nbrTerrains: nbrTerrains,
@@ -54,7 +93,7 @@ function AddTerrain() {
     <ScrollView
       keyboardShouldPersistTaps="handled"
       horizontal={false}
-      style={{ margin: 10 }}
+      style={{ margin: 10, flex: 1 }}
     >
       <View
         style={{
@@ -138,6 +177,27 @@ function AddTerrain() {
             </Callout>
           </Marker>
         </MapView>
+
+        <View>
+          <Text>AJOUTER L'IMAGE DU TERRAIN:</Text>
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              style={{ width: "100%", height: 150 }}
+            />
+          ) : (
+            <Image
+              source={{
+                uri: "https://t4.ftcdn.net/jpg/04/81/13/43/360_F_481134373_0W4kg2yKeBRHNEklk4F9UXtGHdub3tYk.jpg",
+              }}
+              style={{ width: "100%", height: 150 }}
+            />
+          )}
+          <Button
+            title="Choisir l'image depuis ma galerie"
+            onPress={pickImage}
+          />
+        </View>
 
         <View>
           <Text>Nom du terrain</Text>
