@@ -15,7 +15,7 @@ export default function Evenements({ navigation }) {
   }, []);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Button
         titleStyle={{ color: "white" }}
         buttonStyle={{

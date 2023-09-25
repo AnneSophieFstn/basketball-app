@@ -15,7 +15,7 @@ export default function Terrains({ navigation }) {
   }, []);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Button
         titleStyle={{ color: "white" }}
         buttonStyle={{

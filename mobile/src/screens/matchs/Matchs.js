@@ -15,7 +15,7 @@ export default function Matchs({ navigation }) {
   }, []);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Button
         titleStyle={{ color: "white" }}
         buttonStyle={{
