@@ -53,7 +53,7 @@ export default function CardComponent({
   };
 
   return (
-    <View>
+    <View style={{ marginBottom: 5 }}>
       <View style={styles.card}>
         <Image source={Playground} style={{ width: "100%", height: 150 }} />
 
@@ -115,11 +115,16 @@ export default function CardComponent({
 
 const styles = StyleSheet.create({
   card: {
-    height: 230,
+    height: 240,
     margin: 5,
     borderRadius: 15,
     backgroundColor: "#EDEDED",
     alignItems: "center",
+    shadowColor: "rgba(0, 0, 0, 0.4)",
+    shadowOffset: { width: 0, height: 2 }, // Décalage horizontal et vertical de l'ombre
+    shadowOpacity: 3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
   infos: {
