@@ -10,6 +10,7 @@ export default function Matchs({ navigation }) {
 
   useEffect(() => {
     configDB.get("/matchs").then((response) => {
+      console.log(response.data[0]);
       setMatchs(response.data);
     });
   }, []);
@@ -38,6 +39,7 @@ export default function Matchs({ navigation }) {
               navigation={navigation}
               key={match.id}
               id={match.id}
+              image={match.terrain.image}
               name={match.name}
               type={match.type}
               date={match.date}

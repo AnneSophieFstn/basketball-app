@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, ScrollView, Text, View } from "react-native";
+import { Alert, Dimensions, Image, ScrollView, Text, View } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import ButtonComponent from "../../button/ButtonComponent";
-import { Input } from "@rneui/base";
+import { Input, Button } from "@rneui/base";
 import configDB from "../../../database/database";
+import * as ImagePicker from "expo-image-picker";
 
 function EditTerrain({ route, navigation }) {
   const { data } = route.params;
   const ref = useRef();
-
+  const [uploading, setUploading] = useState(false); // État pour suivre le chargement de l'image
+  const [imageUri, setImageUri] = useState(null);
   const [region, setRegion] = useState({
     latitude: data.latitude,
     longitude: data.longitude,
@@ -20,15 +22,78 @@ function EditTerrain({ route, navigation }) {
 
   const [terrain, setTerrain] = useState({
     id: data["id"],
+    image: data["image"],
     name: data["name"],
     nbrPaniers: data["nbrPaniers"],
     adresse: data["adresse"],
     nbrTerrains: data["nbrTerrains"],
     latitude: data["latitude"],
     longitude: data["longitude"],
-    user_id: data["user_id"],
+    user_id: 1,
   });
 
+  const pickImage = async () => {
+    const showConfirmationAlert = () => {
+      Alert.alert(
+        "ATTENTION",
+        "Vous êtes sur le point de remplacer l'image actuelle, TOUTE ACTION EST IRRÉVERSIBLE ! En êtes-vous sûr ?",
+        [
+          {
+            text: "Oui",
+            onPress: async () => {
+              // Si l'utilisateur clique sur "Oui", continuez avec la demande de permission
+              const { status } =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
+              if (status !== "granted") {
+                Alert.alert(
+                  "Permission refusée",
+                  "Désolé, nous avons besoin d'accéder à votre galerie pour que cela fonctionne.",
+                  [{ text: "OK" }]
+                );
+                return;
+              }
+
+              const response = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+              });
+
+              if (response.canceled) {
+                return;
+              }
+
+              setImageUri(response.assets[0].uri);
+              onChangeImage(response.assets[0].uri);
+            },
+          },
+          {
+            text: "Non",
+            onPress: () => {
+              // Si l'utilisateur clique sur "Non", ne faites rien
+            },
+            style: "cancel",
+          },
+        ]
+      );
+    };
+
+    // Affichez l'alerte de confirmation
+    showConfirmationAlert();
+  };
+
+  const canceledImage = () => {
+    Alert.alert(
+      "ATTENTION",
+      "Vous êtes sur le point de supprimer l'image, en êtes vous sur ?",
+      [{ text: "OK" }]
+    );
+    onChangeImage(data.image);
+    //setState(true);
+  };
+
+  const onChangeImage = (value) => {
+    setTerrain({ ...terrain, image: value });
+  };
   const onChangeName = (value) => {
     setTerrain({ ...terrain, name: value });
   };
@@ -49,31 +114,35 @@ function EditTerrain({ route, navigation }) {
   };
 
   const EditTerrain = async () => {
-    console.log(terrain.id);
-    console.log(terrain.name);
-    console.log(ref.current?.getAddressText());
-    console.log(terrain.latitude);
-    console.log(terrain.longitude.longitude);
-    console.log(terrain.nbrTerrains);
+    const uriParts = terrain.image.split(".");
+    const fileType = uriParts[uriParts.length - 1];
 
-    const data = {
-      id: terrain.id,
-      name: terrain.name,
-      adresse: ref.current?.getAddressText(),
-      latitude: terrain.latitude,
-      longitude: terrain.longitude.longitude,
-      nbrPaniers: terrain.nbrPaniers,
-      nbrTerrains: terrain.nbrTerrains,
-      user_id: 1,
-    };
-    //console.log("data inside editTerrain", data);
+    const formData = new FormData();
+    formData.append("image", {
+      uri: terrain.image,
+      type: `image/${fileType}`,
+      name: `image.${fileType}`,
+    });
+
+    formData.append("id", terrain.id);
+    formData.append("name", terrain.name);
+    formData.append("adresse", ref.current?.getAddressText());
+    formData.append("nbrTerrains", terrain.nbrTerrains);
+    formData.append("nbrPaniers", terrain.nbrPaniers);
+    formData.append("latitude", terrain.latitude);
+    formData.append("longitude", terrain.longitude);
+    formData.append("user_id", 1);
 
     try {
-      const response = await configDB.put(`/terrains/${data.id}`, data);
-      console.log("Réponse du serveur : ", response.data);
+      const response = await configDB.put(`/terrains/${data.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Réponse du serveur : ", response);
       navigation.push("Accueil", { screen: "Terrains" });
     } catch (error) {
-      console.error("error: ", error.response);
+      console.error("error: ", error);
     }
   };
 
@@ -85,12 +154,12 @@ function EditTerrain({ route, navigation }) {
     <ScrollView
       keyboardShouldPersistTaps="handled"
       horizontal={false}
-      style={{ margin: 10 }}
+      style={{ flex: 1, marginBottom: 10 }}
     >
       <View
         style={{
-          height: Dimensions.get("window").height,
-          marginBottom: 50,
+          flexGrow: 1,
+          margin: 10,
         }}
       >
         <View>
@@ -98,7 +167,7 @@ function EditTerrain({ route, navigation }) {
             Informations sur le terrain
           </Text>
           <Text style={{ marginLeft: 10, marginBottom: 5 }}>
-            Modifier les infroamtions à propos de ce terrain. Attention, votre
+            Modifier les informations à propos de ce terrain. Attention, votre
             demande va être envoyé à notre administrateur pour confirmer les
             modifications.
           </Text>
@@ -149,30 +218,96 @@ function EditTerrain({ route, navigation }) {
             />
           </ScrollView>
         </View>
-
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={{
-            width: "auto",
-            height: "40%",
-            margin: 10,
-          }}
-          region={region}
-          showsUserLocation={true}
-          /* ref = {ref => this.map = ref} */
-        >
-          <Marker
-            coordinate={{
-              latitude: region.latitude,
-              longitude: region.longitude,
+        <View style={{ height: 250, margin: 10, paddingBottom: 20 }}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{
+              flex: 1,
             }}
-            draggable={true}
+            region={region}
+            showsUserLocation={true}
+            /* ref = {ref => this.map = ref} */
           >
-            <Callout>
-              <Text>Je suis ici</Text>
-            </Callout>
-          </Marker>
-        </MapView>
+            <Marker
+              coordinate={{
+                latitude: region.latitude,
+                longitude: region.longitude,
+              }}
+              draggable={true}
+            >
+              <Callout>
+                <Text>Je suis ici</Text>
+              </Callout>
+            </Marker>
+          </MapView>
+        </View>
+
+        <View style={{ paddingBottom: 25 }}>
+          <Text style={{ paddingBottom: 10, fontWeight: "bold" }}>
+            Changer l'image du terrain
+          </Text>
+          {/* {terrain.image ? (
+            <> */}
+          <Image
+            source={{
+              uri: imageUri || `${configDB.defaults.baseURL}/${data.image}`,
+            }}
+            style={{ width: "100%", height: 250 }}
+          />
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Button
+              type="solid"
+              onPress={pickImage}
+              buttonStyle={{
+                backgroundColor: "orange",
+              }}
+              disabled={uploading}
+            >
+              <Ionicons name="images-outline" size={24} color="white" />
+              {"  "}Choisir une autre image
+            </Button>
+            <Button
+              type="solid"
+              onPress={canceledImage}
+              buttonStyle={{
+                backgroundColor: "red",
+              }}
+              disabled={uploading}
+            >
+              <Ionicons name="images-outline" size={24} color="white" />
+              {"  "}Annuler
+            </Button>
+          </View>
+          {/* </>
+          ) : (
+            <>
+              <Image
+                source={{
+                  uri: "https://t4.ftcdn.net/jpg/04/81/13/43/360_F_481134373_0W4kg2yKeBRHNEklk4F9UXtGHdub3tYk.jpg",
+                }}
+                style={{ width: "100%", height: 250 }}
+              />
+              <Button
+                type="solid"
+                onPress={pickImage}
+                buttonStyle={{
+                  backgroundColor: "orange",
+                }}
+                disabled={uploading}
+              >
+                <Ionicons name="images-outline" size={24} color="white" />
+                {"  "}Choisir l'image depuis ma galerie
+              </Button>
+            </>
+          )} */}
+        </View>
 
         <View>
           <Text>Nom du terrain</Text>

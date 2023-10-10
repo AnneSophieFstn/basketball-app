@@ -1,13 +1,14 @@
 import * as React from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
-import Playground from "../../../assets/playground.jpg";
 import { Button } from "@rneui/themed";
 import { Ionicons } from "@expo/vector-icons";
+import configDB from "../../database/database";
 
 export default function CardComponent({
   navigation,
   id,
   name,
+  image,
   type,
   payant,
   date,
@@ -31,6 +32,7 @@ export default function CardComponent({
     const data = {
       id,
       name,
+      image,
       type,
       payant,
       date,
@@ -49,16 +51,27 @@ export default function CardComponent({
       titleBtn,
       routeApi,
     };
+
     navigation.navigate(routeName, { data });
   };
 
   return (
     <View style={{ marginBottom: 5 }}>
       <View style={styles.card}>
-        <Image source={Playground} style={{ width: "100%", height: 150 }} />
+        {image && (
+          <Image
+            source={{
+              uri: `${configDB.defaults.baseURL}/${image}`,
+            }}
+            style={{ width: "100%", height: 150, resizeMode: "stretch" }}
+            onError={(error) =>
+              console.error("Erreur de chargement de l'image : ", error)
+            }
+          />
+        )}
 
         <View style={styles.infos}>
-          <View>
+          <View style={{ width: "77%" }}>
             <Text style={{ fontSize: 23, paddingTop: 8, paddingBottom: 10 }}>
               {name}
             </Text>
@@ -71,9 +84,7 @@ export default function CardComponent({
                 <Text style={{ color: "#FF9A62" }}>{heure}</Text>
               </Text>
             )}
-            <Text style={{ fontSize: 13, color: "#595959" }}>
-              24 avenue de Chicago, Saint-Denis - La Réunion
-            </Text>
+            <Text style={{ fontSize: 13, color: "#595959" }}>{adresse}</Text>
           </View>
 
           <View style={{ alignItems: "center" }}>
@@ -115,7 +126,7 @@ export default function CardComponent({
 
 const styles = StyleSheet.create({
   card: {
-    height: 240,
+    height: 260,
     margin: 5,
     borderRadius: 15,
     backgroundColor: "#EDEDED",

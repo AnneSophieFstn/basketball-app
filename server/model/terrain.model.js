@@ -7,6 +7,16 @@ const Terrain = sequelize.define("Terrains", {
     autoIncrement: true,
     primaryKey: true,
   },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: {
+        args: true,
+        msg: "L'image ne doit pas être vide.",
+      },
+    },
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,

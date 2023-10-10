@@ -10,6 +10,7 @@ export default function Evenements({ navigation }) {
 
   useEffect(() => {
     configDB.get("/evenements").then((response) => {
+      console.log(response.data[0]);
       setEvenements(response.data);
     });
   }, []);
@@ -38,7 +39,9 @@ export default function Evenements({ navigation }) {
               navigation={navigation}
               key={evenement.id}
               id={evenement.id}
+              image={evenement.terrain.image}
               name={evenement.name}
+              adresse={evenement.terrain.adresse}
               type={evenement.type}
               date={evenement.date}
               heure={evenement.heure}

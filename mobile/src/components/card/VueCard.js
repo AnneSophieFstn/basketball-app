@@ -17,13 +17,9 @@ import configDB from "../../database/database";
 export default function VueCard({ navigation, route }) {
   const { data } = route.params;
   const [visible, setVisible] = React.useState(false);
-  const [adresseT, setAdresseT] = React.useState(data.terrain_id);
 
   const [matchs, setMatchs] = React.useState([]);
   const [evenements, setEvenements] = React.useState([]);
-
-  //console.log("TERRAIN DATA: ", data);
-  //console.log("TERRAIN DATA MATCHS: ", matchs);
 
   const toggleOverlay = () => {
     setVisible(!visible);
@@ -32,17 +28,11 @@ export default function VueCard({ navigation, route }) {
   React.useEffect(() => {
     navigation.setOptions({ title: data.title });
 
-    /* configDB.get(`/terrains/${data.terrain_id}`).then((response) => {
-      setAdresseT(response.data.adresse);
-    }); */
-
     configDB.get(`/matchs/terrain/${data.id}`).then((response) => {
-      //console.log(response.data);
       setMatchs(response.data);
     });
 
     configDB.get(`/evenements/terrain/${data.id}`).then((response) => {
-      //console.log(response.data);
       setEvenements(response.data);
     });
   }, []);
@@ -51,7 +41,12 @@ export default function VueCard({ navigation, route }) {
     <>
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View>
-          <Image source={Playground} style={{ width: "100%", height: 250 }} />
+          <Image
+            source={{
+              uri: `${configDB.defaults.baseURL}/${data.image}`,
+            }}
+            style={{ width: "100%", height: 250 }}
+          />
         </View>
         <View
           style={{
@@ -135,9 +130,7 @@ export default function VueCard({ navigation, route }) {
             />
           </View>
           <View style={{ alignItems: "center", padding: 5 }}>
-            <Text style={{ color: "#595959" }}>
-              {adresseT} {data.adresse}
-            </Text>
+            <Text style={{ color: "#595959" }}>{data.adresse}</Text>
           </View>
 
           <View

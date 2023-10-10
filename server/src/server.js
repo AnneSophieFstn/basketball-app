@@ -1,17 +1,21 @@
 import express from "express";
-import connectDB from "../database/database.js";
 import MatchRoutes from "../routes/match.routes.js";
 import UserRoutes from "../routes/user.routes.js";
 import EvenementRoutes from "../routes/evenement.routes.js";
 import TerrainRoutes from "../routes/terrain.routes.js";
+import { fileURLToPath } from "url";
+import path from "path";
 
 const app = express();
 app.use(express.json());
 
 const port = process.env.PORT || 8000;
 
-//connectDB();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const imagesDirectory = path.resolve(__dirname, "../images");
 
+app.use("/images", express.static(imagesDirectory));
 app.use(UserRoutes);
 app.use(MatchRoutes);
 app.use(EvenementRoutes);

@@ -24,9 +24,11 @@ async function getOneTerrain(req, res) {
     });
   }
 }
+
 async function createTerrain(req, res) {
   try {
     if (
+      !req.file ||
       !req.body.name ||
       !req.body.adresse ||
       !req.body.nbrTerrains ||
@@ -40,7 +42,11 @@ async function createTerrain(req, res) {
         .json({ message: "Merci de renseigner l'ensemble des informations" });
     }
 
+    const filePath = req.file.path; // Chemin du fichier téléchargé
+    const correctedPath = filePath.replace(/\\/g, "/");
+
     const createTerrain = await Terrain.create({
+      image: correctedPath,
       name: req.body.name,
       adresse: req.body.adresse,
       nbrTerrains: req.body.nbrTerrains,
@@ -62,6 +68,7 @@ async function createTerrain(req, res) {
 async function updateTerrain(req, res) {
   try {
     if (
+      !req.file ||
       !req.body.name ||
       !req.body.adresse ||
       !req.body.nbrTerrains ||
@@ -75,8 +82,12 @@ async function updateTerrain(req, res) {
         .json({ message: "Merci de renseigner l'ensemble des informations" });
     }
 
+    const filePath = req.file.path; // Chemin du fichier téléchargé
+    const correctedPath = filePath.replace(/\\/g, "/");
+
     const updateTerrain = await Terrain.update(
       {
+        image: correctedPath,
         name: req.body.name,
         adresse: req.body.adresse,
         nbrTerrains: req.body.nbrTerrains,

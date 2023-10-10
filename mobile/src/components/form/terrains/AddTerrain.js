@@ -1,21 +1,14 @@
 import React, { useState } from "react";
-import {
-  Dimensions,
-  ScrollView,
-  Text,
-  View,
-  Image,
-  Button,
-} from "react-native";
+import { Dimensions, ScrollView, Text, View, Image, Alert } from "react-native";
 import configDB from "../../../database/database";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Input } from "@rneui/base";
+import { Input, Button } from "@rneui/base";
 import ButtonComponent from "../../button/ButtonComponent";
 import * as ImagePicker from "expo-image-picker";
 
-function AddTerrain() {
+function AddTerrain({ navigation }) {
   const [region, setRegion] = useState({
     latitude: -21.1088145,
     longitude: 55.5380413,
@@ -23,7 +16,8 @@ function AddTerrain() {
     longitudeDelta: 0.0521,
   });
 
-  const [image, setImage] = React.useState(null);
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false); // État pour suivre le chargement de l'image
   const [name, setName] = useState("");
   const [adresse, setAdresse] = useState("");
   const [nbrTerrains, setNbrTerrains] = useState("");
@@ -35,57 +29,78 @@ function AddTerrain() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      alert(
-        "Désolé, nous avons besoin d'acceder à votre galerie pour que cela fonctionne !"
+      Alert.alert(
+        "Permission refusée",
+        "Désolé, nous avons besoin d'accéder à votre galerie pour que cela fonctionne.",
+        [{ text: "OK" }]
       );
+      return;
     }
 
-    if (status === "granted") {
-      const response = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-      });
+    const response = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+    });
 
-      console.log(response.assets[0].uri);
-
-      if (!response.cancelled) {
-        setImage(response.assets[0].uri);
-      }
+    if (response.canceled) {
+      return;
     }
+
+    setImage(response.assets[0].uri);
+  };
+
+  const canceledImage = () => {
+    setImage(null);
+    //setState(true);
   };
 
   const AddTerrain = async () => {
-    console.log("name", name);
-    console.log("adresse", adresse.adresse);
-    console.log("nbrTerrains", nbrTerrains);
-    console.log("nbrPaniers", nbrPaniers);
-    console.log("latitude", latitude.latitude);
-    console.log("longitude", longitude.longitude);
-    console.log("user_id", user_id);
+    if (image && !uploading) {
+      setUploading(true);
 
-    const formData = new FormData();
-    formData.append("playground", {
-      name: new Date() + "_playground",
-      uri: image,
-      type: "image/jpg",
-    });
+      const uriParts = image.split(".");
+      const fileType = uriParts[uriParts.length - 1];
 
-    const data = {
-      image: formData,
-      name: name,
-      adresse: adresse.adresse,
-      nbrTerrains: nbrTerrains,
-      nbrPaniers: nbrPaniers,
-      latitude: latitude.latitude,
-      longitude: longitude.longitude,
-      user_id: 1,
-    };
+      const formData = new FormData();
+      formData.append("image", {
+        uri: image,
+        type: `image/${fileType}`,
+        name: `image.${fileType}`,
+      });
 
-    try {
-      const response = await configDB.post("/terrains", data);
-      console.log("Réponse du serveur :", response.data);
-    } catch (error) {
-      console.error("error", error.response.data);
+      formData.append("name", name);
+      formData.append("adresse", adresse.adresse);
+      formData.append("nbrTerrains", nbrTerrains);
+      formData.append("nbrPaniers", nbrPaniers);
+      formData.append("latitude", latitude.latitude);
+      formData.append("longitude", longitude.longitude);
+      formData.append("user_id", 1);
+
+      try {
+        const response = await configDB.post("/terrains", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        console.log(response);
+        setUploading(false);
+        navigation.push("Accueil", { screen: "Terrains" });
+
+        if (response && response.data) {
+          console.log("Réponse du serveur :", response.data);
+        } else {
+          console.error("Réponse du serveur non valide :", response);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la requête au serveur :", error);
+      }
+    } else {
+      Alert.alert(
+        "Aucune image sélectionnée",
+        "Veuillez d'abord sélectionner une image.",
+        [{ text: "OK" }]
+      );
     }
   };
 
@@ -93,12 +108,12 @@ function AddTerrain() {
     <ScrollView
       keyboardShouldPersistTaps="handled"
       horizontal={false}
-      style={{ margin: 10, flex: 1 }}
+      style={{ flex: 1, marginBottom: 10 }}
     >
       <View
         style={{
-          height: Dimensions.get("window").height,
-          marginBottom: 50,
+          flexGrow: 1,
+          margin: 10,
         }}
       >
         <View>
@@ -154,53 +169,101 @@ function AddTerrain() {
             />
           </ScrollView>
         </View>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={{
-            width: "auto",
-            height: "40%",
-            margin: 10,
-          }}
-          region={region}
-          showsUserLocation={true}
-          /* ref = {ref => this.map = ref} */
-        >
-          <Marker
-            coordinate={{
-              latitude: region.latitude,
-              longitude: region.longitude,
-            }}
-            draggable={true}
+        <View style={{ height: 250, margin: 10, paddingBottom: 20 }}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{ flex: 1 }}
+            region={region}
+            showsUserLocation={true}
+            /* ref = {ref => this.map = ref} */
           >
-            <Callout>
-              <Text>Je suis ici</Text>
-            </Callout>
-          </Marker>
-        </MapView>
-
-        <View>
-          <Text>AJOUTER L'IMAGE DU TERRAIN:</Text>
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              style={{ width: "100%", height: 150 }}
-            />
-          ) : (
-            <Image
-              source={{
-                uri: "https://t4.ftcdn.net/jpg/04/81/13/43/360_F_481134373_0W4kg2yKeBRHNEklk4F9UXtGHdub3tYk.jpg",
+            <Marker
+              coordinate={{
+                latitude: region.latitude,
+                longitude: region.longitude,
               }}
-              style={{ width: "100%", height: 150 }}
-            />
+              draggable={true}
+            >
+              <Callout>
+                <Text>Je suis ici</Text>
+              </Callout>
+            </Marker>
+          </MapView>
+        </View>
+
+        <View style={{ paddingBottom: 25 }}>
+          <Text style={{ paddingBottom: 10, fontWeight: "bold" }}>
+            Ajouter l'image du terrain
+          </Text>
+          {image ? (
+            <>
+              <Image
+                source={{ uri: image }}
+                style={{ width: "100%", height: 250 }}
+              />
+
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Button
+                  type="solid"
+                  onPress={pickImage}
+                  buttonStyle={{
+                    backgroundColor: "orange",
+                  }}
+                  disabled={uploading}
+                >
+                  <Ionicons name="images-outline" size={24} color="white" />
+                  {"  "}Choisir une autre image
+                </Button>
+                <Button
+                  type="solid"
+                  onPress={canceledImage}
+                  buttonStyle={{
+                    backgroundColor: "red",
+                  }}
+                  disabled={uploading}
+                >
+                  <Ionicons name="images-outline" size={24} color="white" />
+                  {"  "}Annuler
+                </Button>
+              </View>
+            </>
+          ) : (
+            <>
+              <Image
+                source={{
+                  uri: "https://t4.ftcdn.net/jpg/04/81/13/43/360_F_481134373_0W4kg2yKeBRHNEklk4F9UXtGHdub3tYk.jpg",
+                }}
+                style={{ width: "100%", height: 250 }}
+              />
+              <Button
+                type="solid"
+                onPress={pickImage}
+                buttonStyle={{
+                  backgroundColor: "orange",
+                }}
+                disabled={uploading}
+              >
+                <Ionicons name="images-outline" size={24} color="white" />
+                {"  "}Choisir l'image depuis ma galerie
+              </Button>
+            </>
           )}
-          <Button
-            title="Choisir l'image depuis ma galerie"
-            onPress={pickImage}
-          />
+
+          {/* <ButtonComponent
+            titleBtn="AJOUTER"
+            action={AddTerrain}
+            disabled={uploading || !image}
+          /> */}
         </View>
 
         <View>
-          <Text>Nom du terrain</Text>
+          <Text style={{ fontWeight: "bold" }}>Nom du terrain</Text>
           <Input
             placeholder="Nom du terrain"
             onChangeText={(name) => setName(name)}
@@ -221,7 +284,7 @@ function AddTerrain() {
         </View>
 
         <View>
-          <Text>Nombre de terrain(s)</Text>
+          <Text style={{ fontWeight: "bold" }}>Nombre de terrain(s)</Text>
           <Input
             keyboardType="number-pad"
             placeholder="0"
@@ -245,7 +308,7 @@ function AddTerrain() {
           />
         </View>
         <View>
-          <Text>Nombre de panier(s)</Text>
+          <Text style={{ fontWeight: "bold" }}>Nombre de panier(s)</Text>
           <Input
             keyboardType="number-pad"
             placeholder="0"

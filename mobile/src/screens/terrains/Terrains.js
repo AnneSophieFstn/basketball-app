@@ -38,6 +38,7 @@ export default function Terrains({ navigation }) {
               navigation={navigation}
               key={terrain.id}
               id={terrain.id}
+              image={terrain.image}
               name={terrain.name}
               adresse={terrain.adresse}
               latitude={terrain.latitude}
