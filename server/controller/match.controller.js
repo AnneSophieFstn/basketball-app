@@ -1,9 +1,21 @@
 import Match from "../model/match.model.js";
+import Terrain from "../model/terrain.model.js";
 
 async function getAllMatch(req, res) {
   try {
     const matchs = await Match.findAll();
-    return res.status(200).json(matchs);
+
+    const matchsWithTerrain = await Promise.all(
+      matchs.map(async (match) => {
+        const terrain = await Terrain.findByPk(match.terrain_id);
+        return {
+          ...match.toJSON(),
+          terrain, // Ajoutez les détails du terrain au match
+        };
+      })
+    );
+
+    return res.status(200).json(matchsWithTerrain);
   } catch (error) {
     return res.status(500).json(
       console.log(error) /* {

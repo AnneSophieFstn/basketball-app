@@ -1,9 +1,21 @@
 import Evenement from "../model/evenement.model.js";
+import Terrain from "../model/terrain.model.js";
 
 async function getAllEvenement(req, res) {
   try {
     const evenements = await Evenement.findAll();
-    return res.status(200).json(evenements);
+
+    const evenementsWithTerrain = await Promise.all(
+      evenements.map(async (evenement) => {
+        const terrain = await Terrain.findByPk(evenement.terrain_id);
+        return {
+          ...evenement.toJSON(),
+          terrain, // Ajouter les détails du terrain au match
+        };
+      })
+    );
+
+    return res.status(200).json(evenementsWithTerrain);
   } catch (error) {
     return res.status(500).json({ messages: error });
   }
